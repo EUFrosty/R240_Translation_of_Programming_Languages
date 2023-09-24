@@ -1,0 +1,61 @@
+Zadatak:
+Napisati ll1 parser koji omogucava definisanje i stampanje skupova.
+
+P = {3, 2, 2, -1};
+Q = 7..10;
+print P;
+print Q;
+print {3, 2, 2, -1};
+print 7..10;
+
+
+----------------------------------------------------------------------
+
+
+Naivna gramatika:
+
+program -> program naredba
+        | naredba
+
+naredba -> ID = izraz ;
+        | PRINT izraz ;
+
+izraz -> { lista }
+        | BROJ TT BROJ
+        | ID
+
+lista -> lista , BROJ
+        | BROJ
+
+
+------------------------------------------------------------------------------
+
+
+Eliminacija leve rekurzije:
+
+program -> naredba program'                             {ID, PRINT}
+
+program' -> naredba program'                            {ID, PRINT}
+        | eps                                           {EOI}
+
+naredba -> ID = izraz;                                  {ID}
+        | PRINT izraz;                                  {PRINT}
+
+izraz -> { lista }                                      {{}
+        | BROJ TT BROJ                                  {BROJ}
+        | ID                                            {ID}
+
+lista -> BROJ lista'                                    {BROJ}
+
+lista' -> , BROJ lista'                                 {,}
+        | eps                                           {}}
+
+First(program)  =   {ID, PRINT}     Follow(program)     =   {EOI}
+First(program') =   {ID, PRINT}     Follow(program')    =   {EOI}
+First(naredba)  =   {ID, PRINT}     Follow(naredba)     =   First(program') U Follow(program')={ID, PRINT, EOI}
+First(izraz)    =   {{, BROJ, ID}   Follow(izraz)       =   {;}
+First(lista)    =   {BROJ}          Follow(lista)       =   {}}
+First(lista')   =   {,}             Follow(lista')      =   {}}
+
+
+

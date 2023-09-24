@@ -1,0 +1,80 @@
+%{
+
+    #include <iostream>
+    #include <cstdlib>
+
+    using namespace std;
+
+    extern int yylex();
+    void yyerror(string s){
+        cerr << "Sintaksna greska: " << s << endl;
+        exit(EXIT_FAILURE);
+    }
+
+%}
+%left NEQ EQ
+%left '|'
+%left '^'
+%left '&'
+%left SL SR
+%left '+' '-'
+%left '*' '/' '%'
+%right '~'
+%right UMINUS
+
+
+%token INT_T ID PRINT_T BROJ SR SL LIST_T
+
+%start program
+
+
+%%
+
+program: naredba '\n' program               {}
+    | naredba '\n'                          {}
+    ;
+naredba: INT_T ID                           {}
+    | INT_T ID '=' izraz                    {}
+    | ID '=' izraz                          {}
+    | PRINT_T '(' izraz ')'                 {}
+    | PRINT_T '(' izraz ',' BROJ ')'        {}
+    | logicka_naredba                       {}
+    | LIST_T ID '=' lista                   {}
+    ;
+logicka_naredba: izraz EQ izraz             {}
+    | izraz NEQ izraz                       {}
+
+izraz: izraz '+' izraz                      {}
+    | izraz '-' izraz                       {}
+    | izraz '*' izraz                       {}
+    | izraz '/' izraz                       {}
+    | izraz '%' izraz                       {}
+    | izraz '&' izraz                       {}
+    | izraz '|' izraz                       {}
+    | izraz '^' izraz                       {}
+    | izraz SL izraz                        {}
+    | izraz SR izraz                        {}
+    | '(' izraz ')'                         {}
+    | '-' izraz     %prec UMINUS            {}
+    | '~' izraz                             {}
+    | ID                                    {}
+    | BROJ                                  {}
+    | ID'['BROJ']'                          {}
+    ;
+lista: '[' elementi ']'                     {}
+    ;
+elementi: elementi ',' izraz                {}
+    | izraz                                 {}
+    ;
+
+
+%%
+
+int main(){
+    if (yyparse() == 0){
+        cout << "Sve ok." << endl;
+    }else{
+        cout<< "Sintaksna greska." << endl;
+    }
+    exit(EXIT_SUCCESS);
+}

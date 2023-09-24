@@ -1,0 +1,66 @@
+Zadatak:
+
+1. Napisati ll1 parser koji omogucava stampanje i definisanje polinoma.
+
+<1,2,3>
+p1 := <1,2,3>
+p2 := p1
+
+Gramatika:
+
+program -> program naredba
+        |naredba
+
+naredba -> polinom '\n'
+        | ID '\n'
+        | ID dodela polinom '\n'
+        | ID dodela ID '\n'
+
+polinom -> '<' lista '>'
+
+lista -> lista ',' BROJ
+    | BROJ
+
+
+
+Eliminacija leve rekurzije i faktorizacije:
+
+
+
+program -> naredba program'                     {ID, <}
+
+program' -> naredba program'                    {ID, <}
+            | eps                               {EOI}
+
+naredba -> polinom '\n'                         {<}
+            | ID ostatak                        {ID}
+
+ostatak -> '\n'                                 {\n}
+            |dodela ostatak2                    {dodela}
+
+ostatak2 -> polinom '\n'                        {<}
+            |ID '\n'                            {ID}
+
+polinom -> '<' lista '>'                        {<}
+
+lista -> BROJ lista'                            {BROJ}
+
+lista' -> ',' BROJ lista'                       {,}
+            | eps                               {>}
+
+
+First(program)  =   {ID, <}         Follow(program)     =   {EOI}
+First(program') =   {ID, <}         Follow(program')    =   {EOI}
+First(naredba)  =   {ID, <}         Follow(naredba)     =   {EOI, ID, <}
+First(ostatak)  =   {\n, dodela}    Follow(ostatak)     =   {EOI, ID, <}
+First(ostatak2) =   {<, ID}         Follow(ostatak2)    =   {EOI, ID, <}
+First(polinom)  =   {<}             Follow(polinom)     =   {EOI, ID, <}
+First(lista)    =   {BROJ}          Follow(lista)       =   {>}
+First(lista')   =   {,}             Follow(lista')      =   {>}
+
+
+
+
+
+
+

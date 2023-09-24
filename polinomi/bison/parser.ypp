@@ -1,0 +1,64 @@
+%{
+    #include <iostream>
+    #include <cstdlib>
+
+    using namespace std;
+
+    extern int yylex();
+
+    void yyerror(string s){
+        cerr << "Sintaksna greska: " << s << endl;
+        exit(EXIT_FAILURE);
+    }
+%}
+
+%left '+' '-'
+%left '*'
+%right UMINUS
+%left '\''
+%left '['
+
+%token BROJ DODELA ID EQ NEQ
+
+%start program
+
+%%
+
+program: naredba '\n' program       {}
+    | naredba '\n'                  {}
+    ;
+naredba: izraz                      {}
+    | ID DODELA izraz               {}
+    | logicka_naredba               {}
+    ;
+logicka_naredba: izraz EQ izraz     {}
+    | izraz NEQ izraz               {}
+    ;
+izraz: izraz '+' izraz              {}
+    | izraz '-' izraz               {}
+    | izraz '*' izraz               {}
+    | '-' izraz     %prec UMINUS    {}
+    | izraz '\''                    {}
+    | '$'izraz'|' BROJ              {}
+    | izraz '[' BROJ ']'            {}
+    | '(' izraz ')'                 {}
+    | polinom                       {}
+    | ID                            {}
+    ;
+polinom: '<' lista '>'              {}
+    ;
+lista: lista ',' BROJ               {}
+    | BROJ                          {}
+    ;
+%%
+
+int main(){
+    if(yyparse() == 0){
+        cout << "Sve ok." << endl;
+    }else{
+        cout << "Sintaksna greska." << endl;
+    }
+
+
+    exit(EXIT_SUCCESS);
+}

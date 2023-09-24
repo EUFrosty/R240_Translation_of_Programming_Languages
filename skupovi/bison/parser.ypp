@@ -1,0 +1,70 @@
+%{
+    #include <iostream>
+
+    using namespace std;
+
+    extern int yylex();
+
+    void yyerror(string s){
+        cerr << "Sintaksna greska: " << s << endl;
+        exit(EXIT_FAILURE);
+    }
+
+
+%}
+%left UNIJA
+%left PRESEK
+%left RAZLIKA
+%right '~'
+
+%token BROJ UNIJA PRESEK RAZLIKA PRINT_T ID DO CHECK CARD DOMEN
+
+
+%start program
+
+%%
+
+program: naredba ';' program            {}
+    |naredba ';'                        {}
+    ;
+naredba: ID '=' izraz                   {}
+    | PRINT_T izraz                     {}
+    | CHECK provera                     {}
+    | CARD izraz                        {}
+    | DOMEN '=' izraz                   {}
+    ;
+provera: BROJ ':' izraz                 {}
+    | izraz '<' izraz                   {}
+    ;
+izraz: skup                             {}
+    | interval                          {}
+    | ID                                {}
+    | izraz UNIJA izraz                 {}
+    | izraz PRESEK izraz                {}
+    | izraz RAZLIKA izraz               {}
+    | '(' izraz ')'                     {}
+    | '~' izraz
+    ;
+skup: '{' lista '}'                     {}
+    ;
+interval: BROJ DO BROJ                  {}
+    ;
+lista: BROJ ',' lista                   {}
+    | BROJ                              {}
+    ;
+
+
+
+
+%%
+
+int main(){
+    if (yyparse() == 0){
+        cout << "OK" << endl;
+    }else{
+        cout << "Sintaksna greska" << endl;
+    }
+    exit(EXIT_SUCCESS);
+}
+
+
